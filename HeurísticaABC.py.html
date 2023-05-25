@@ -1,0 +1,127 @@
+<html>
+<head>
+<title>HeurísticaABC.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6897bb;}
+.s3 { color: #808080;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+HeurísticaABC.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">random</span>
+
+<span class="s0">class </span><span class="s1">Bee:</span>
+    <span class="s0">def </span><span class="s1">__init__(self</span><span class="s0">, </span><span class="s1">position):</span>
+        <span class="s1">self.position = position</span>
+        <span class="s1">self.trials = </span><span class="s2">0</span>
+
+<span class="s0">class </span><span class="s1">EightQueensABC:</span>
+    <span class="s0">def </span><span class="s1">__init__(self</span><span class="s0">, </span><span class="s1">num_employed_bees</span><span class="s0">, </span><span class="s1">num_onlooker_bees</span><span class="s0">, </span><span class="s1">max_trials):</span>
+        <span class="s1">self.board_size = </span><span class="s2">8</span>
+        <span class="s1">self.num_employed_bees = num_employed_bees</span>
+        <span class="s1">self.num_onlooker_bees = num_onlooker_bees</span>
+        <span class="s1">self.max_trials = max_trials</span>
+
+    <span class="s0">def </span><span class="s1">is_valid(self</span><span class="s0">, </span><span class="s1">board</span><span class="s0">, </span><span class="s1">row</span><span class="s0">, </span><span class="s1">col):</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(row):</span>
+            <span class="s0">if </span><span class="s1">board[i] == col </span><span class="s0">or </span><span class="s1">\</span>
+               <span class="s1">board[i] - i == col - row </span><span class="s0">or </span><span class="s1">\</span>
+               <span class="s1">board[i] + i == col + row:</span>
+                <span class="s0">return False</span>
+        <span class="s0">return True</span>
+
+    <span class="s0">def </span><span class="s1">calculate_conflicts(self</span><span class="s0">, </span><span class="s1">board):</span>
+        <span class="s1">conflicts = </span><span class="s2">0</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(self.board_size):</span>
+            <span class="s0">for </span><span class="s1">j </span><span class="s0">in </span><span class="s1">range(i + </span><span class="s2">1</span><span class="s0">, </span><span class="s1">self.board_size):</span>
+                <span class="s0">if </span><span class="s1">board[i] == board[j] </span><span class="s0">or </span><span class="s1">\</span>
+                   <span class="s1">board[i] - i == board[j] - j </span><span class="s0">or </span><span class="s1">\</span>
+                   <span class="s1">board[i] + i == board[j] + j:</span>
+                    <span class="s1">conflicts += </span><span class="s2">1</span>
+        <span class="s0">return </span><span class="s1">conflicts</span>
+
+    <span class="s0">def </span><span class="s1">generate_bee(self):</span>
+        <span class="s0">return </span><span class="s1">Bee([random.randint(</span><span class="s2">0</span><span class="s0">, </span><span class="s1">self.board_size - </span><span class="s2">1</span><span class="s1">) </span><span class="s0">for </span><span class="s1">_ </span><span class="s0">in </span><span class="s1">range(self.board_size)])</span>
+
+    <span class="s0">def </span><span class="s1">initialize_population(self):</span>
+        <span class="s0">return </span><span class="s1">[self.generate_bee() </span><span class="s0">for </span><span class="s1">_ </span><span class="s0">in </span><span class="s1">range(self.num_employed_bees)]</span>
+
+    <span class="s0">def </span><span class="s1">employed_bee_phase(self</span><span class="s0">, </span><span class="s1">population):</span>
+        <span class="s0">for </span><span class="s1">bee </span><span class="s0">in </span><span class="s1">population:</span>
+            <span class="s1">index = random.randint(</span><span class="s2">0</span><span class="s0">, </span><span class="s1">self.board_size - </span><span class="s2">1</span><span class="s1">)</span>
+            <span class="s1">new_position = bee.position.copy()</span>
+            <span class="s0">while </span><span class="s1">new_position[index] == bee.position[index]:</span>
+                <span class="s1">new_position[index] = random.randint(</span><span class="s2">0</span><span class="s0">, </span><span class="s1">self.board_size - </span><span class="s2">1</span><span class="s1">)</span>
+            <span class="s0">if </span><span class="s1">self.calculate_conflicts(new_position) &lt; self.calculate_conflicts(bee.position):</span>
+                <span class="s1">bee.position = new_position.copy()</span>
+                <span class="s1">bee.trials = </span><span class="s2">0</span>
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">bee.trials += </span><span class="s2">1</span>
+
+    <span class="s0">def </span><span class="s1">onlooker_bee_phase(self</span><span class="s0">, </span><span class="s1">population):</span>
+        <span class="s1">fitness_values = [</span><span class="s2">1 </span><span class="s1">/ (self.calculate_conflicts(bee.position) + </span><span class="s2">1</span><span class="s1">) </span><span class="s0">for </span><span class="s1">bee </span><span class="s0">in </span><span class="s1">population]</span>
+        <span class="s1">total_fitness = sum(fitness_values)</span>
+        <span class="s1">probabilities = [fitness / total_fitness </span><span class="s0">for </span><span class="s1">fitness </span><span class="s0">in </span><span class="s1">fitness_values]</span>
+
+        <span class="s0">for </span><span class="s1">_ </span><span class="s0">in </span><span class="s1">range(self.num_onlooker_bees):</span>
+            <span class="s1">selected_bee = random.choices(population</span><span class="s0">, </span><span class="s1">probabilities)[</span><span class="s2">0</span><span class="s1">]</span>
+            <span class="s1">index = random.randint(</span><span class="s2">0</span><span class="s0">, </span><span class="s1">self.board_size - </span><span class="s2">1</span><span class="s1">)</span>
+            <span class="s1">new_position = selected_bee.position.copy()</span>
+            <span class="s0">while </span><span class="s1">new_position[index] == selected_bee.position[index]:</span>
+                <span class="s1">new_position[index] = random.randint(</span><span class="s2">0</span><span class="s0">, </span><span class="s1">self.board_size - </span><span class="s2">1</span><span class="s1">)</span>
+            <span class="s0">if </span><span class="s1">self.calculate_conflicts(new_position) &lt; self.calculate_conflicts(selected_bee.position):</span>
+                <span class="s1">selected_bee.position = new_position.copy()</span>
+                <span class="s1">selected_bee.trials = </span><span class="s2">0</span>
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">selected_bee.trials += </span><span class="s2">1</span>
+
+    <span class="s0">def </span><span class="s1">evaluate_solution(self</span><span class="s0">, </span><span class="s1">solution):</span>
+        <span class="s1">conflicts = self.calculate_conflicts(solution)</span>
+        <span class="s0">return </span><span class="s2">1 </span><span class="s1">/ (conflicts + </span><span class="s2">1</span><span class="s1">)  </span><span class="s3"># Heurística: mayor aptitud para soluciones con menos conflictos</span>
+
+    <span class="s0">def </span><span class="s1">find_solution(self):</span>
+        <span class="s1">population = self.initialize_population()</span>
+        <span class="s1">best_solution = </span><span class="s0">None</span>
+        <span class="s1">best_fitness = </span><span class="s2">0</span>
+        <span class="s1">iterations_without_improvement = </span><span class="s2">0</span>
+
+        <span class="s0">while </span><span class="s1">iterations_without_improvement &lt; self.max_trials:</span>
+            <span class="s1">self.employed_bee_phase(population)</span>
+            <span class="s1">self.onlooker_bee_phase(population)</span>
+
+            <span class="s0">for </span><span class="s1">bee </span><span class="s0">in </span><span class="s1">population:</span>
+                <span class="s1">fitness = self.evaluate_solution(bee.position)</span>
+                <span class="s0">if </span><span class="s1">fitness &gt; best_fitness:</span>
+                    <span class="s1">best_solution = bee.position.copy()</span>
+                    <span class="s1">best_fitness = fitness</span>
+                    <span class="s1">iterations_without_improvement = </span><span class="s2">0</span>
+                <span class="s0">else</span><span class="s1">:</span>
+                    <span class="s1">iterations_without_improvement += </span><span class="s2">1</span>
+
+            <span class="s0">if </span><span class="s1">best_fitness == </span><span class="s2">1</span><span class="s1">:</span>
+                <span class="s0">return </span><span class="s1">best_solution</span>
+
+        <span class="s0">return None</span>
+
+<span class="s3"># Ejemplo de uso</span>
+<span class="s1">eight_queens_abc = EightQueensABC(num_employed_bees=</span><span class="s2">50</span><span class="s0">, </span><span class="s1">num_onlooker_bees=</span><span class="s2">50</span><span class="s0">, </span><span class="s1">max_trials=</span><span class="s2">1000</span><span class="s1">)</span>
+<span class="s1">solution = eight_queens_abc.find_solution()</span>
+
+<span class="s0">if </span><span class="s1">solution </span><span class="s0">is not None</span><span class="s1">:</span>
+    <span class="s1">print(</span><span class="s4">&quot;Solución encontrada:&quot;</span><span class="s1">)</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(eight_queens_abc.board_size):</span>
+        <span class="s1">row = [</span><span class="s4">'R' </span><span class="s0">if </span><span class="s1">j == solution[i] </span><span class="s0">else </span><span class="s4">'-' </span><span class="s0">for </span><span class="s1">j </span><span class="s0">in </span><span class="s1">range(eight_queens_abc.board_size)]</span>
+        <span class="s1">print(</span><span class="s4">' '</span><span class="s1">.join(row))</span>
+<span class="s0">else</span><span class="s1">:</span>
+    <span class="s1">print(</span><span class="s4">&quot;No se encontró una solución válida.&quot;</span><span class="s1">)</span>
+</pre>
+</body>
+</html>
