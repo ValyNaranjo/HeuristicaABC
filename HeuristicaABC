@@ -1,107 +1,107 @@
 import random
 
-class Bee:
-    def __init__(self, position):
-        self.position = position
-        self.trials = 0
+class Abeja:
+def init(self, posicion):
+self.posicion = posicion
+self.intentos = 0
 
-class EightQueensABC:
-    def __init__(self, num_employed_bees, num_onlooker_bees, max_trials):
-        self.board_size = 8
-        self.num_employed_bees = num_employed_bees
-        self.num_onlooker_bees = num_onlooker_bees
-        self.max_trials = max_trials
+class OchoReinasABC:
+def init(self, num_abejas_empleadas, num_abejas_observadoras, max_intentos):
+self.tam_tablero = 8
+self.num_abejas_empleadas = num_abejas_empleadas
+self.num_abejas_observadoras = num_abejas_observadoras
+self.max_intentos = max_intentos
 
-    def is_valid(self, board, row, col):
-        for i in range(row):
-            if board[i] == col or \
-               board[i] - i == col - row or \
-               board[i] + i == col + row:
-                return False
-        return True
+def es_valido(self, tablero, fila, columna):
+    for i in range(fila):
+        if tablero[i] == columna or \
+           tablero[i] - i == columna - fila or \
+           tablero[i] + i == columna + fila:
+            return False
+    return True
 
-    def calculate_conflicts(self, board):
-        conflicts = 0
-        for i in range(self.board_size):
-            for j in range(i + 1, self.board_size):
-                if board[i] == board[j] or \
-                   board[i] - i == board[j] - j or \
-                   board[i] + i == board[j] + j:
-                    conflicts += 1
-        return conflicts
+def calcular_conflictos(self, tablero):
+    conflictos = 0
+    for i in range(self.tam_tablero):
+        for j in range(i + 1, self.tam_tablero):
+            if tablero[i] == tablero[j] or \
+               tablero[i] - i == tablero[j] - j or \
+               tablero[i] + i == tablero[j] + j:
+                conflictos += 1
+    return conflictos
 
-    def generate_bee(self):
-        return Bee([random.randint(0, self.board_size - 1) for _ in range(self.board_size)])
+def generar_abeja(self):
+    return Abeja([random.randint(0, self.tam_tablero - 1) for _ in range(self.tam_tablero)])
 
-    def initialize_population(self):
-        return [self.generate_bee() for _ in range(self.num_employed_bees)]
+def inicializar_poblacion(self):
+    return [self.generar_abeja() for _ in range(self.num_abejas_empleadas)]
 
-    def employed_bee_phase(self, population):
-        for bee in population:
-            index = random.randint(0, self.board_size - 1)
-            new_position = bee.position.copy()
-            while new_position[index] == bee.position[index]:
-                new_position[index] = random.randint(0, self.board_size - 1)
-            if self.calculate_conflicts(new_position) < self.calculate_conflicts(bee.position):
-                bee.position = new_position.copy()
-                bee.trials = 0
+def fase_abejas_empleadas(self, poblacion):
+    for abeja in poblacion:
+        indice = random.randint(0, self.tam_tablero - 1)
+        nueva_posicion = abeja.posicion.copy()
+        while nueva_posicion[indice] == abeja.posicion[indice]:
+            nueva_posicion[indice] = random.randint(0, self.tam_tablero - 1)
+        if self.calcular_conflictos(nueva_posicion) < self.calcular_conflictos(abeja.posicion):
+            abeja.posicion = nueva_posicion.copy()
+            abeja.intentos = 0
+        else:
+            abeja.intentos += 1
+
+def fase_abejas_observadoras(self, poblacion):
+    valores_aptitud = [1 / (self.calcular_conflictos(abeja.posicion) + 1) for abeja in poblacion]
+    suma_aptitud = sum(valores_aptitud)
+    probabilidades = [aptitud / suma_aptitud for aptitud in valores_aptitud]
+
+    for _ in range(self.num_abejas_observadoras):
+        abeja_seleccionada = random.choices(poblacion, probabilidades)[0]
+        indice = random.randint(0, self.tam_tablero - 1)
+        nueva_posicion = abeja_seleccionada.posicion.copy()
+        while nueva_posicion[indice] == abeja_seleccionada.posicion[indice]:
+            nueva_posicion[indice] = random.randint(0, self.tam_tablero - 1)
+        if self.calcular_conflictos(nueva_posicion) < self.calcular_conflictos(abeja_seleccionada.posicion):
+            abeja_seleccionada.posicion = nueva_posicion.copy()
+            abeja_seleccionada.intentos = 0
+        else:
+            abeja_seleccionada.intentos += 1
+
+def evaluar_solucion(self, solucion):
+    conflictos = self.calcular_conflictos(solucion)
+    return 1 / (conflictos + 1)  # Heurística: mayor aptitud para soluciones con menos conflictos
+
+def encontrar_solucion(self):
+    poblacion = self.inicializar_poblacion()
+    mejor_solucion = None
+    mejor_aptitud = 0
+    iteraciones_sin_mejora = 0
+
+    while iteraciones_sin_mejora < self.max_intentos:
+        self.fase_abejas_empleadas(poblacion)
+        self.fase_abejas_observadoras(poblacion)
+
+        for abeja in poblacion:
+            aptitud = self.evaluar_solucion(abeja.posicion)
+            if aptitud > mejor_aptitud:
+                mejor_solucion = abeja.posicion.copy()
+                mejor_aptitud = aptitud
+                iteraciones_sin_mejora = 0
             else:
-                bee.trials += 1
+                iteraciones_sin_mejora += 1
 
-    def onlooker_bee_phase(self, population):
-        fitness_values = [1 / (self.calculate_conflicts(bee.position) + 1) for bee in population]
-        total_fitness = sum(fitness_values)
-        probabilities = [fitness / total_fitness for fitness in fitness_values]
+        if mejor_aptitud == 1:
+            return mejor_solucion
 
-        for _ in range(self.num_onlooker_bees):
-            selected_bee = random.choices(population, probabilities)[0]
-            index = random.randint(0, self.board_size - 1)
-            new_position = selected_bee.position.copy()
-            while new_position[index] == selected_bee.position[index]:
-                new_position[index] = random.randint(0, self.board_size - 1)
-            if self.calculate_conflicts(new_position) < self.calculate_conflicts(selected_bee.position):
-                selected_bee.position = new_position.copy()
-                selected_bee.trials = 0
-            else:
-                selected_bee.trials += 1
-
-    def evaluate_solution(self, solution):
-        conflicts = self.calculate_conflicts(solution)
-        return 1 / (conflicts + 1)  # Heurística: mayor aptitud para soluciones con menos conflictos
-
-    def find_solution(self):
-        population = self.initialize_population()
-        best_solution = None
-        best_fitness = 0
-        iterations_without_improvement = 0
-
-        while iterations_without_improvement < self.max_trials:
-            self.employed_bee_phase(population)
-            self.onlooker_bee_phase(population)
-
-            for bee in population:
-                fitness = self.evaluate_solution(bee.position)
-                if fitness > best_fitness:
-                    best_solution = bee.position.copy()
-                    best_fitness = fitness
-                    iterations_without_improvement = 0
-                else:
-                    iterations_without_improvement += 1
-
-            if best_fitness == 1:
-                return best_solution
-
-        return None
+    return None
 
 # Ejemplo de uso
-eight_queens_abc = EightQueensABC(num_employed_bees=50, num_onlooker_bees=50, max_trials=1000)
-solution = eight_queens_abc.find_solution()
+ocho_reinas_abc = OchoReinasABC(num_abejas_empleadas=50, num_abejas_observadoras=50, max_intentos=1000)
+solucion = ocho_reinas_abc.encontrar_solucion()
 
-if solution is not None:
-    print("Solución encontrada:")
-    for i in range(eight_queens_abc.board_size):
-        row = ['R' if j == solution[i] else '-' for j in range(eight_queens_abc.board_size)]
-        print(' '.join(row))
+if solucion is not None:
+print("Solución encontrada:")
+for i in range(ocho_reinas_abc.tam_tablero):
+fila = ['R' if j == solucion[i] else '-' for j in range(ocho_reinas_abc.tam_tablero)]
+print(' '.join(fila))
 else:
-    print("No se encontró una solución válida.")
-    
+print("No se encontró una solución válida.")
+  
